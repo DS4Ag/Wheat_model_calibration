@@ -15,3 +15,4 @@ labels = list(labels_dict.values())
 # Output files
 cluster_csv_output = '../output/clustering/clusters_k-means.csv'
 final_figure_output = '../output/clustering/integrated_cluster_figure.svg'
+feature_contributions_output = '../output/clustering/all_feature_contributions.csv'
