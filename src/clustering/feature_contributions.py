@@ -61,7 +61,6 @@ def analyze_feature_contributions(data_dir, output_path=None):
 
         # Extract the optimal number of components from elbow analysis
         elbow_point = int(kl.knee) if kl.knee else 2
-        print(f"Number of components for {label}: {elbow_point}")
 
         # === Apply PCA with Optimal Components ===
         pca_com = PCA(n_components=elbow_point)
@@ -89,19 +88,42 @@ def analyze_feature_contributions(data_dir, output_path=None):
         ).reset_index().rename(columns={'index': 'feature'})
 
         # Add treatment info from label
-        loading_df['treatment'] = label
+        loading_df['data_subset'] = label
 
         # Append to global list
         all_loadings.append(loading_df)
 
-        # if elbow_point >= 2:
-        #     print('\nFeatures contributing to PC2:')
-        #     print(loading_df.set_index('feature')['PC2'].abs().sort_values(ascending=False))
-        # print('\n')
+    # Combine all loading dataframes
+    combined_loadings_df = pd.concat(all_loadings, ignore_index=True)
 
-    # # Combine all loading dataframes
-    # combined_loadings_df = pd.concat(all_loadings, ignore_index=True)
-    #
-    # # (Optional) Save to CSV
-    # combined_loadings_df.to_csv("plots/clustering/combined_feature_loadings.csv", index=False)
+    # Map dictionary to DataFrame features
+    def map_feature_and_treatment(df, mapping_dict):
+        updated_names = []
+        treatments = []
+        for f in df['feature']:
+            if f in mapping_dict:
+                updated_names.append(mapping_dict[f][0])
+                treatments.append(mapping_dict[f][1])
+            else:
+                updated_names.append(f)  # Keep original if not found
+                treatments.append(None)
+        df['future_new_name'] = updated_names
+        df['treatment'] = treatments
+        return df
+
+    # Apply the mapping to your combined_loadings_df
+    combined_loadings_df = map_feature_and_treatment(combined_loadings_df, mapping_dict)
+
+    # Delete old future names column
+    combined_loadings_df.drop('feature', axis=1, inplace=True)
+
+    # Rename the future column
+    combined_loadings_df.rename(columns={'future_new_name': 'feature'})
+
+    # Move columns to the beginning onf the df
+    cols_to_move = ['data_subset', 'treatment', 'future_new_name']
+    combined_loadings_df = combined_loadings_df[cols_to_move + [col for col in combined_loadings_df.columns if col not in cols_to_move]]
+
+    # (Optional) Save to CSV
+    combined_loadings_df.to_csv(feature_contributions_output, index=False)
 
