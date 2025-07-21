@@ -741,8 +741,8 @@ def generate_integrated_cluster_figure():
     ##############################################################################
     # ====== Add Main Panel Titles ======
     fig.text(0.10, 0.92, '(a)', fontsize=fontsize_title, fontname=font_name, weight='bold')
-    fig.text(0.10, 0.47, '(b)', fontsize=fontsize_title, fontname=font_name, weight='bold')
-    fig.text(0.43, 0.92, '(c)', fontsize=fontsize_title, fontname=font_name, weight='bold')
+    fig.text(0.10, 0.47, '(c)', fontsize=fontsize_title, fontname=font_name, weight='bold')
+    fig.text(0.43, 0.92, '(b)', fontsize=fontsize_title, fontname=font_name, weight='bold')
 
     # Combine all clusters into final DataFrame and export it
     df_clusters = pd.concat(cluster_dfs, ignore_index=True)

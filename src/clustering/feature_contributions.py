@@ -62,6 +62,8 @@ def analyze_feature_contributions(data_dir, output_path=None):
         # Extract the optimal number of components from elbow analysis
         elbow_point = int(kl.knee) if kl.knee else 2
 
+        print(f"Number of components for {label}: {elbow_point}")
+
         # === Apply PCA with Optimal Components ===
         pca_com = PCA(n_components=elbow_point)
         principal_components = pca_com.fit_transform(data_scaled)
@@ -92,6 +94,14 @@ def analyze_feature_contributions(data_dir, output_path=None):
 
         # Append to global list
         all_loadings.append(loading_df)
+
+        # Display top contributing features for first two PCs
+        print('Features contributing to PC1:')
+        print(loading_df['PC1'].abs().sort_values(ascending=False))
+
+        print('\nFeatures contributing to PC2:')
+        print(loading_df['PC2'].abs().sort_values(ascending=False))
+        print('\n')
 
     # Combine all loading dataframes
     combined_loadings_df = pd.concat(all_loadings, ignore_index=True)
