@@ -1,106 +1,108 @@
-# Wheat Modeling Calibration
+# Wheat Model Calibration
 
-This repository provides a modular and reproducible framework for analyzing multi-trait crop data, with a focus on dimensionality reduction and clustering methods. It is structured for extensibility, allowing new analysis types to be added as separate modules.
-
----
+This repository provides a modular, reproducible Python framework for advanced crop model calibration and benchmarking—designed for analyzing multi-trait wheat data across diverse environments. Each analysis type (e.g., clustering, ecotype calibration) is organized as a standalone module for maximum extensibility and reusability.
 
 ## Project Structure
 
-```
-
-DS4Ag/Wheat_model_calibration
-├── data/                      # Input data files organized by analysis type
-│   └── clustering/
-├── plots/                     # Output figures and data
-│   └── clustering/
-├── scripts/                   # Execution scripts for each analysis module
-│   └── generate_cluster_figure.py
-├── src/
-│   └── clustering/            # Core logic for the clustering workflow
-│       ├── plot_cluster_figure.py
+```text
+Wheat_model_calibration/
+├── data/                          # Input data for each analysis module
+│   ├── clustering/
+│   ├── DSSAT48/
+│   └── ecotype_calibration/
+├── output/                        # Output results (figures, summaries) per module
+│   ├── clustering/
+│   └── ecotype_calibration/
+├── scripts/                       # Orchestrated entry-point scripts for each workflow
+│   ├── generate_cluster_figure.py
+│   ├── generate_ecotype_heatmaps.py
+│   └── analyze_feature_contributions.py
+├── src/                           # Core reusable code for all analyses
+│   ├── clustering/
+│   │   ├── config_paths.py
+│   │   ├── feature_contributions.py
+│   │   ├── integrated_cluster_figure.py
+│   │   ├── load_data.py
+│   │   ├── manual_offsets.py
+│   │   ├── plot_style.py
+│   │   └── variable_mapping.py
+│   └── ecotype_calibration/
 │       ├── config_paths.py
+│       ├── heatmap_figure.py
 │       ├── plot_style.py
-│       └── manual_offsets.py
-├── requirements.txt           # Python dependencies
-└── README.md                  # This file
-
-````
-
----
+│       └── variable_mapping.py
+│   ├── metrics/
+│   ├── data_preparation.py
+│   ├── utils.py
+│   └── __init__.py
+├── requirements.txt               # Python dependencies (all modules)
+└── README.md
+```
 
 ## Quick Start
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/crop_modeling_calibration.git
-cd crop_modeling_calibration
-````
+git clone https://github.com/your-username/wheat_model_calibration.git
+cd wheat_model_calibration
+```
 
-### 2. Set up environment (optional but recommended)
+### 2. Set up environment
 
 ```bash
 python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
+source venv/bin/activate        # Windows: venv\\Scripts\\activate
 ```
 
-### 3. Install required packages
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Run analysis
+## Analysis Modules
 
-Each analysis module has its own script in the `scripts/` folder. The main output (e.g., figures and CSVs) will be saved in the corresponding `plots/` folder.
+Each analysis module in `scripts/` is fully independent—results are saved under `output/`.  
+The workflow for each is: **extract → calculate → plot** (modular steps, re-used across modules).
 
----
+| Analysis              | Source Folder              | Script to Run                          | Output Folder               |
+|-----------------------|---------------------------|----------------------------------------|---------------------------|
+| Clustering            | `src/clustering/`         | `scripts/generate_cluster_figure.py`   | `output/clustering/`       |
+| Ecotype Calibration   | `src/ecotype_calibration/`| `scripts/generate_ecotype_heatmaps.py` | `output/ecotype_calibration/` |
 
-## Analysis Modules Overview
+### Clustering Analysis
 
-| Analysis      | Folder (`src/`)   | Script to Run                        | Output Location     |
-| ------------- | ----------------- | ------------------------------------ | ------------------- |
-| Clustering    | `src/clustering/` | `scripts/generate_cluster_figure.py` | `plots/clustering/` |
-| (more coming) | —                 | —                                    | —                   |
-
----
-
-## Clustering Analysis
-
-This module performs:
-
-* **PCA** with automatic component selection
-* **Hierarchical clustering** with dendrograms
-* **KMeans clustering** on PCA-reduced data
-* Combined **panel figure** showing explained variance, dendrograms, and cluster scatter plots
-
-### Files
-
-| File                                    | Purpose                                                           |
-| --------------------------------------- | ----------------------------------------------------------------- |
-| `scripts/generate_cluster_figure.py`    | Main script to run the clustering workflow                        |
-| `src/clustering/plot_cluster_figure.py` | Core function (`generate_integrated_cluster_figure`) for plotting |
-| `src/clustering/config_paths.py`        | Defines input data paths, output paths, and dataset labels        |
-| `src/clustering/plot_style.py`          | Contains plot settings (fonts, colors, sizes)                     |
-| `src/clustering/manual_offsets.py`      | Optional: manually adjusts text label positions in PCA plots      |
-
-### How to Run
+Performs:
+- **Dimensionality reduction** (PCA)
+- **Hierarchical & KMeans clustering**
+- **Integrated cluster visualization**
 
 ```bash
 python scripts/generate_cluster_figure.py
 ```
 
-This will:
+**Outputs:**  
+- Integrated cluster figure (`output/clustering/`)
+- Cluster assignments CSV
 
-* Load the input datasets from `data/clustering/`
-* Generate the composite figure
-* Export:
+--- 
 
-  * A `.png` file with the final figure to `plots/clustering/`
-  * A `.csv` file with cluster assignments to `plots/clustering/`
+### Ecotype Calibration Module
 
-### Input Data Format
+Evaluates:
+- **Multi-environment ecotype calibration**
+- **Four key metrics:** NRMSE, MPE, R² (1:1), Gain
+- **4-panel comparative heatmap**
 
-Each dataset in `data/clustering/` should be a CSV file with numeric trait columns and optional metadata (e.g., `genotype`, `entry`, `treatment`, `season`). No preprocessing is needed; missing values are handled internally.
+```bash
+python scripts/generate_ecotype_heatmaps.py
+```
 
----
+**Outputs:**
+- Multi-metric heatmap SVG (`output/ecotype_calibration/`)
+
+## Input Data Requirements
+
+All datasets should be in tabular (CSV or DSSAT OVERVIEW.OUT) form, with numeric trait columns and minimal preprocessing required.  
+Config files (YAML) for each calibration subset specify which variables, methods, and metadata to use.
